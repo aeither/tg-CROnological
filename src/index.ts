@@ -1,6 +1,7 @@
 import { webhookCallback } from 'grammy';
 import { initBot } from './bot';
 import type Env from './environment.d';
+import { handleWebhook } from './webhook';
 
 /**
  * ===
@@ -30,9 +31,7 @@ export default {
 		if (url.pathname.slice(1) === 'health') {
 			return new Response('OK', { status: 200 });
 		}
-		/**
-		 * Route Webhook to Grammy Telegram Bot
-		 */
+
 		if (url.pathname.slice(1) === bot.token) {
 			try {
 				const callback = webhookCallback(bot, 'cloudflare-mod');
@@ -43,9 +42,9 @@ export default {
 		}
 
 		if (url.pathname.slice(1) === 'webhook') {
-			// TODO triggerdotdev receive
+			return handleWebhook(req, env);
 		}
 
-		return new Response(); // Fix return type
+		return new Response('Not found', { status: 404 });
 	},
 };

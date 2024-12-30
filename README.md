@@ -26,6 +26,14 @@ cp .dev.vars.example .dev.vars
 
 - `bun run dev`
 
+# Development Setup (Local - Webhook)
+
+- `bun run dev:webhook` and `bun run dev:2`
+
+Triggerdotdev: Update `src/trigger`
+
+`pn dlx trigger.dev@latest dev` and Testing `https://cloud.trigger.dev`
+
 # Deployment Setup
 
 0. Run the command line `bun run secret`.
