@@ -11,6 +11,7 @@ import { tasks } from "@trigger.dev/sdk/v3";
 import * as bip39 from "bip39";
 import type { Bot } from "grammy";
 import type Env from "../environment";
+import type { newWalletTask } from "../trigger/new-wallet";
 
 require("dotenv").config();
 
@@ -22,11 +23,10 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
     );
   });
   bot.command("trigger", async (ctx) => {
-    const res = await tasks.trigger("hello-world", {}, {
-
-    })
+    console.log("start trigger")
+    const res = await tasks.trigger<typeof newWalletTask>("new-wallet", {})
     console.log("🚀 ~ main ~ res:", res)
-
+    
     await ctx.reply(
       "Welcome! I can help you check Solana balances. Send me a Solana address."
     );

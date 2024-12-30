@@ -1,7 +1,7 @@
 import { Client, CronosZkEvm, Wallet } from '@crypto.com/developer-platform-client';
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
 
-export const helloWorldTask = task({
+export const newWalletTask = task({
   id: "new-wallet",
   // Set an optional maxDuration to prevent tasks from running indefinitely
   maxDuration: 300, // Stop executing after 300 secs (5 mins) of compute

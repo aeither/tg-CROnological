@@ -26,6 +26,8 @@ export default {
 	async fetch(req: Request, env: Env): Promise<Response> {
 		const bot = initBot(env);
 
+		console.log("index here")
+
 		const url = new URL(req.url);
 		if (url.pathname.slice(1) === 'health') {
 			return new Response('OK', { status: 200 });
