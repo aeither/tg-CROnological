@@ -6,7 +6,7 @@
 		"cf-typegen": "wrangler types",
 		"dev": "bun run --hot src/index_dev.ts",
 		"dev:webhook": "wrangler dev",
-		"dev:2": "ngrok http 8787",
+		"dev:2": "ngrok http --domain=basically-enough-clam.ngrok-free.app 8787",
 		"ship": "wrangler deploy",
 		"cmd": "bun run scripts/commands.ts",
 		"info": "bun run scripts/info.ts",

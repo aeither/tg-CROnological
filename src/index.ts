@@ -1,6 +1,7 @@
-import Env from './environment.d';
 import { webhookCallback } from 'grammy';
 import { initBot } from './bot';
+import type Env from './environment.d';
+
 /**
  * ===
  * Development Using Webhook Steps:
@@ -23,12 +24,28 @@ import { initBot } from './bot';
 
 export default {
 	async fetch(req: Request, env: Env): Promise<Response> {
-		try {
-			const bot = initBot(env);
-			const cb = webhookCallback(bot, 'cloudflare-mod');
-			return await cb(req);
-		} catch (e: any) {
-			return new Response(e.message, { status: 500 });
+		const bot = initBot(env);
+
+		const url = new URL(req.url);
+		if (url.pathname.slice(1) === 'health') {
+			return new Response('OK', { status: 200 });
 		}
+		/**
+		 * Route Webhook to Grammy Telegram Bot
+		 */
+		if (url.pathname.slice(1) === bot.token) {
+			try {
+				const callback = webhookCallback(bot, 'cloudflare-mod');
+				return await callback(req);
+			} catch (error: any) {
+				return new Response(error.message, { status: 500 });
+			}
+		}
+
+		if (url.pathname.slice(1) === 'webhook') {
+			// TODO triggerdotdev receive
+		}
+
+		return new Response(); // Fix return type
 	},
 };
