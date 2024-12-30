@@ -42,7 +42,7 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
     });
 
     const result = await generateText({
-      model: groq("llama-3.1-70b-versatile"),
+      model: groq("llama-3.3-70b-versatile"),
       tools: await getTools(env),
       maxSteps: 5,
       prompt: "send 0.0001 SOL to Bk7CrPhiH1bxtNf1CSVqg4arKevE61CUFontX7jumsy8",

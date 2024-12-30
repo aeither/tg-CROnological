@@ -7,14 +7,12 @@ const EXPLORER_API_KEY = process.env.EXPLORER_API_KEY
 
 const main = async () => {
     Client.init({
-        chain: CronosZkEvm.Testnet, // Or CronosEvm.Mainnet for mainnet
-        apiKey: EXPLORER_API_KEY, // Explorer API
-        // provider: 'https://provider-url.com', // Optional provider URL for signing
+        chain: CronosZkEvm.Testnet, 
+        apiKey: EXPLORER_API_KEY,
     });
 
     const wallet = await Wallet.create();
     console.log(wallet);
-
 };
 
 main()
