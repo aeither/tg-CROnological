@@ -7,6 +7,7 @@ export default interface Env {
   NODE_ENV: string;
   GROQ_API_KEY: string;
   WALLET_MNEMONIC: string;
+  TRIGGER_SECRET_KEY: string;
 }
 
 declare global {

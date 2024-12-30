@@ -7,15 +7,20 @@ import { solana } from "@goat-sdk/wallet-solana";
 
 import { sendSOL } from "@goat-sdk/core";
 import { Connection, Keypair } from "@solana/web3.js";
-import { tasks } from "@trigger.dev/sdk/v3";
+import { configure, tasks } from "@trigger.dev/sdk/v3";
 import * as bip39 from "bip39";
 import type { Bot } from "grammy";
 import type Env from "../environment";
-import type { newWalletTask } from "../trigger/new-wallet";
 
 require("dotenv").config();
 
+
 export const setupBotHandlers = (bot: Bot, env: Env) => {
+
+  configure({
+    secretKey: env.TRIGGER_SECRET_KEY, // starts with tr_dev_ or tr_prod_
+  });
+
   // Handle the /start command
   bot.command("start", async (ctx) => {
     await ctx.reply(
@@ -23,13 +28,21 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
     );
   });
   bot.command("trigger", async (ctx) => {
-    console.log("start trigger")
-    const res = await tasks.trigger<typeof newWalletTask>("new-wallet", {})
-    console.log("🚀 ~ main ~ res:", res)
-    
-    await ctx.reply(
-      "Welcome! I can help you check Solana balances. Send me a Solana address."
-    );
+    try {
+      console.log("start trigger")
+      const res = await tasks.trigger("new-wallet", {})
+      console.log("🚀 ~ main ~ res:", res)
+
+      await ctx.reply(
+        "Welcome! I can help you check Solana balances. Send me a Solana address."
+      );
+    } catch (error) {
+      console.error(error)
+      await ctx.reply(
+        "somehting went wrong"
+      );
+    }
+
   });
 
   // Handle regular messages
