@@ -32,7 +32,7 @@ cp .dev.vars.example .dev.vars
 
 1. Run the command line `bun run ship`.
 
-2. Set webhook to deployed URL by accessing `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<MY_BOT>.<MY_SUBDOMAIN>.workers.dev/` from your browser or configure `scripts/commands.ts` and run `bun run cmd`
+2. Set webhook to deployed URL by accessing `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<MY_BOT>.<MY_SUBDOMAIN>.workers.dev/<BOT_TOKEN>` from your browser or configure `scripts/commands.ts` and run `bun run cmd`
 3. Test by sending message to Bot.
 
 ---
