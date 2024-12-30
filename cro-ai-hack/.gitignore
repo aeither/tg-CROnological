@@ -1,0 +1,12 @@
+# See https://www.toptal.com/developers/gitignore/api/node-typescript
+node_modules
+coverage
+*.env
+
+# TypeScript
+*.tsbuildinfo
+.tsconfig
+
+# IDEs and editors
+.vscode
+.idea
