@@ -14,7 +14,6 @@ import type Env from "../environment";
 
 require("dotenv").config();
 
-
 export const setupBotHandlers = (bot: Bot, env: Env) => {
 
   configure({
@@ -42,7 +41,6 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
         "somehting went wrong"
       );
     }
-
   });
 
   // Handle regular messages
