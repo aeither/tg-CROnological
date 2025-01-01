@@ -26,10 +26,17 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
       "Welcome! I can help you check Solana balances. Send me a Solana address."
     );
   });
+  bot.command("id", async (ctx) => {
+    console.log('chatId: ', ctx.chat.id.toString());
+    
+    await ctx.reply(
+      "chat id"
+    );
+  });
   bot.command("trigger", async (ctx) => {
     try {
       console.log("start trigger")
-      const res = await tasks.trigger("new-wallet", {})
+      const res = await tasks.trigger("new-wallet-not", {})
       console.log("🚀 ~ main ~ res:", res)
 
       await ctx.reply(
