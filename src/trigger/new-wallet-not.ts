@@ -1,4 +1,3 @@
-import { Client, CronosZkEvm, Wallet } from '@crypto.com/developer-platform-client';
 import { logger, task, wait } from "@trigger.dev/sdk/v3";
 
 export const newWalletNotTask = task({
@@ -9,58 +8,46 @@ export const newWalletNotTask = task({
     timer: string;
     action: string;
   }, { ctx }) => {
-    logger.log("Starting new wallet creation task", { payload, ctx });
+    logger.log("Starting webhook call for wallet creation", { payload, ctx });
 
     try {
-      // Wait for specified duration
+      // Wait for specified duration if timer provided
       if (payload.timer) {
         const seconds = Number.parseInt(payload.timer);
         await wait.for({ seconds });
       }
 
-      // Initialize client
-      Client.init({
-        chain: CronosZkEvm.Testnet,
-        apiKey: process.env.EXPLORER_API_KEY!,
+      // Call webhook
+      const webhookResponse = await fetch(`${process.env.WEBHOOK_URL}/webhook`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: ctx.run.id,
+          action: 'create_wallet',
+          data: {
+            chatId: payload.chatId,
+          },
+          timestamp: new Date().toISOString()
+        })
       });
 
-      // Create wallet
-      const wallet = await Wallet.create();
-
-      // Prepare telegram message
-      const botToken = process.env.TG_BOT_TOKEN!;
-      const message = `New wallet created!\nAddress: ${wallet.data.address}`;
-
-      // Send telegram notification
-      const telegramResponse = await fetch(
-        `https://api.telegram.org/bot${botToken}/sendMessage`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            chat_id: payload.chatId,
-            text: message,
-          }),
-        }
-      );
-
-      if (!telegramResponse.ok) {
-        throw new Error('Failed to send Telegram notification');
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text();
+        throw new Error(`Webhook call failed: ${errorText}`);
       }
+
+      const result = await webhookResponse.json();
+      logger.log("Webhook called successfully", { result });
 
       return {
         success: true,
-        address: wallet.data.address,
-        privateKey: wallet.data.privateKey,
-        mnemonic: wallet.data.mnemonic,
-        notification: await telegramResponse.json(),
-        action: payload.action // Include action in response
+        ...(result as object)
       };
 
     } catch (error) {
-      logger.error("Failed to create wallet or notify webhook", { error });
+      logger.error("Failed to call webhook", { error });
       throw error;
     }
   },

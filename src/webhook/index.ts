@@ -1,5 +1,4 @@
-// webhook.ts
-
+import { Client, CronosZkEvm, Wallet } from '@crypto.com/developer-platform-client';
 import type Env from "../environment";
 
 export interface WebhookPayload {
@@ -10,8 +9,6 @@ export interface WebhookPayload {
 }
 
 export async function handleWebhook(req: Request, env: Env): Promise<Response> {
-    
-    // Verify request method
     if (req.method !== 'POST') {
         return new Response('Method not allowed', { status: 405 });
     }
@@ -19,7 +16,6 @@ export async function handleWebhook(req: Request, env: Env): Promise<Response> {
     try {
         const payload = (await req.json()) as WebhookPayload;
 
-        // Handle different webhook actions
         switch (payload.action) {
             case 'create_wallet':
                 return await handleCreateWallet(payload.data, env);
@@ -39,16 +35,51 @@ async function handleCreateWallet(
     env: Env
 ): Promise<Response> {
     try {
-        // Implement wallet creation logic here
-        // Example:
-        // const wallet = await createNewWallet();
-        return new Response(JSON.stringify({ success: true }), {
+        // Initialize client
+        Client.init({
+            chain: CronosZkEvm.Testnet,
+            apiKey: env.EXPLORER_API_KEY,
+        });
+
+        // Create wallet
+        const wallet = await Wallet.create();
+
+        // Send telegram notification
+        const message = `New wallet created!\nAddress: ${wallet.data.address}`;
+        const telegramResponse = await fetch(
+            `https://api.telegram.org/bot${env.BOT_TOKEN_DEV}/sendMessage`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: data.chatId,
+                    text: message,
+                }),
+            }
+        );
+
+        if (!telegramResponse.ok) {
+            throw new Error('Failed to send Telegram notification');
+        }
+
+        return new Response(
+            JSON.stringify({
+                success: true,
+                address: wallet.data.address,
+                privateKey: wallet.data.privateKey,
+                mnemonic: wallet.data.mnemonic,
+                notification: await telegramResponse.json()
+            }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
-        });
+        }
+        );
     } catch (error) {
+        console.error('Create wallet error:', error);
         return new Response(
-            JSON.stringify({ success: false, error: 'Failed to create wallet' }),
+            JSON.stringify({ success: false, error: 'Failed to create wallet or send notification' }),
             {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' },
@@ -63,8 +94,6 @@ async function handleFetchOnchainData(
 ): Promise<Response> {
     try {
         // Implement onchain data fetching logic here
-        // Example:
-        // const onchainData = await fetchOnchainData(data.address);
         return new Response(JSON.stringify({ success: true }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },

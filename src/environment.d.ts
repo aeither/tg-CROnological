@@ -8,6 +8,7 @@ export default interface Env {
   GROQ_API_KEY: string;
   WALLET_MNEMONIC: string;
   TRIGGER_SECRET_KEY: string;
+  EXPLORER_API_KEY: string;
 }
 
 declare global {
