@@ -1,15 +1,9 @@
 // botHandlers.ts
 import { createGroq } from "@ai-sdk/groq";
-import { generateText } from "ai";
-
-import { getOnChainTools } from "@goat-sdk/adapter-vercel-ai";
-import { solana } from "@goat-sdk/wallet-solana";
-
-import { sendSOL } from "@goat-sdk/core";
-import { Connection, Keypair } from "@solana/web3.js";
 import { configure, tasks } from "@trigger.dev/sdk/v3";
-import * as bip39 from "bip39";
+import { generateObject } from "ai";
 import type { Bot } from "grammy";
+import { z } from 'zod';
 import type Env from "../environment";
 
 require("dotenv").config();
@@ -28,7 +22,7 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
   });
   bot.command("id", async (ctx) => {
     console.log('chatId: ', ctx.chat.id.toString());
-    
+
     await ctx.reply(
       "chat id"
     );
@@ -36,7 +30,7 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
   bot.command("trigger", async (ctx) => {
     try {
       console.log("start trigger")
-      const res = await tasks.trigger("new-wallet-not", {})
+      const res = await tasks.trigger("new-wallet-not", { "chatId": ctx.chat.id.toString(), "action": "hello123" })
       console.log("🚀 ~ main ~ res:", res)
 
       await ctx.reply(
@@ -59,43 +53,35 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
       apiKey: env.GROQ_API_KEY,
     });
 
-    const result = await generateText({
+    const systemPrompt = "You are an assistant that interprets user requests and schedules actions. For example, if the user says 'create a wallet in 5 minutes', you should return an object with the action 'create a wallet' and a timer in seconds, e.g., 300 seconds.";
+
+    const result = await generateObject({
       model: groq("llama-3.3-70b-versatile"),
-      tools: await getTools(env),
-      maxSteps: 5,
-      prompt: "send 0.0001 SOL to Bk7CrPhiH1bxtNf1CSVqg4arKevE61CUFontX7jumsy8",
+      schema: z.object({
+        action: z.string(),
+        timer: z.string(),
+      }),
+      prompt: `${systemPrompt}\n\nUser: ${text}`,
     });
 
-    console.log(result.text);
+    const res = await tasks.trigger("new-wallet-not", {
+      "chatId": ctx.chat.id.toString(),
+      "action": result.object.action,
+      "timer": result.object.timer
+    });
+    console.log("🚀 ~ main ~ res:", res)
 
-    await ctx.reply(result.text);
-  });
-};
+    // Calculate scheduled time
+    const scheduledTime = new Date(Date.now() + Number.parseInt(result.object.timer) * 1000);
+    const formattedTime = scheduledTime.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+      month: 'short',
+      day: 'numeric'
+    });
 
-const getTools = async (env: Env) => {
-  const connection = new Connection(
-    "https://api.devnet.solana.com",
-    "confirmed"
-  );
-
-  const mnemonic = env.WALLET_MNEMONIC;
-
-  if (!mnemonic) {
-    throw new Error("WALLET_MNEMONIC is not set in the environment");
-  }
-
-  const seed = bip39.mnemonicToSeedSync(mnemonic);
-  const keypair = Keypair.fromSeed(Uint8Array.from(seed).subarray(0, 32));
-  const pkey = keypair.publicKey.toBase58();
-  console.log("🚀 ~ keypair:", pkey);
-
-  const tools = await getOnChainTools({
-    wallet: solana({
-      keypair: keypair as any,
-      connection: connection as any,
-    }),
-    plugins: [sendSOL()],
+    await ctx.reply(`Scheduled: ${result.object.action} at ${formattedTime}`);
   });
 
-  return tools;
 };

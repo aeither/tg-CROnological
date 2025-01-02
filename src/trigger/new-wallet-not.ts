@@ -1,13 +1,23 @@
 import { Client, CronosZkEvm, Wallet } from '@crypto.com/developer-platform-client';
-import { logger, task } from "@trigger.dev/sdk/v3";
+import { logger, task, wait } from "@trigger.dev/sdk/v3";
 
 export const newWalletNotTask = task({
   id: "new-wallet-not",
   maxDuration: 300,
-  run: async (payload: { chatId: string }, { ctx }) => {
+  run: async (payload: {
+    chatId: string;
+    timer: string;
+    action: string;
+  }, { ctx }) => {
     logger.log("Starting new wallet creation task", { payload, ctx });
 
     try {
+      // Wait for specified duration
+      if (payload.timer) {
+        const seconds = Number.parseInt(payload.timer);
+        await wait.for({ seconds });
+      }
+
       // Initialize client
       Client.init({
         chain: CronosZkEvm.Testnet,
@@ -46,6 +56,7 @@ export const newWalletNotTask = task({
         privateKey: wallet.data.privateKey,
         mnemonic: wallet.data.mnemonic,
         notification: await telegramResponse.json(),
+        action: payload.action // Include action in response
       };
 
     } catch (error) {
