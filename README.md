@@ -1,48 +1,31 @@
-# Telegram Bot Starter Template With Cloudflare Workers Hosting
+# CROnological Telegram Bot
 
-Tech Stack: Bun + Grammy + Typescript
+Make scheduling tasks as easy as talking to a friend. AI that plans your tasks when and where they make sense.
 
-# Resources
+## Overview
+CROnological is a Telegram bot that helps Web3 developers and crypto enthusiasts automate and schedule blockchain-related tasks using natural language. Just chat with the bot to schedule on-chain data fetching, monitoring, and notifications - no complex cron syntax needed.
 
-- [Grammy - Hosting: Cloudflare Workers (Node.js)](https://grammy.dev/hosting/cloudflare-workers-nodejs)
-- [Cloudflare Environment Variables](https://developers.cloudflare.com/workers/configuration/environment-variables/)
-- [Cloudflare Secrets Variables](https://developers.cloudflare.com/workers/configuration/secrets/)
+## Key Features
+* Natural language task scheduling (e.g. "check ETH gas every hour")
+* Blockchain data monitoring and alerts
+* Flexible scheduling (one-time, recurring, custom intervals)
+* Smart notification delivery via Telegram
+* Supports multiple chains (Ethereum, Polygon, etc.)
+* Task management (view, edit, delete scheduled tasks)
+* Context-aware scheduling based on blockchain events
+* No-code automation for on-chain activities
 
-# Initiation Setup
+## Problems Solved
+* Eliminates the need to write complex cron jobs for blockchain monitoring
+* Saves time by automating repetitive blockchain data checks
+* Reduces missed opportunities with timely notifications
+* Makes blockchain automation accessible to non-technical users
+* Centralizes task scheduling and notifications in Telegram
 
-1. Follow [Grammy - Hosting: Cloudflare Workers (Node.js)](https://grammy.dev/hosting/cloudflare-workers-nodejs) to setup
-
-- Update `package.json`
-
-- Update `wrangler.toml`
-
-2. Setup `dev.vars`
-
-```bash
-cp .dev.vars.example .dev.vars
-```
-
-# Development Setup (Local - Long Polling)
-
-- `bun run dev`
-
-# Development Setup (Local - Webhook)
-
-- `bun run dev:webhook` and `bun run dev:2`
-
-Triggerdotdev: Update `src/trigger`
-
-`pn dlx trigger.dev@latest dev` and Testing `https://cloud.trigger.dev`
-
-# Deployment Setup
-
-0. Run the command line `bun run secret`.
-
-1. Run the command line `bun run ship`.
-
-2. Set webhook to deployed URL by accessing `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<MY_BOT>.<MY_SUBDOMAIN>.workers.dev/<BOT_TOKEN>` from your browser or configure `scripts/commands.ts` and run `bun run cmd`
-3. Test by sending message to Bot.
-
----
-
-**Good Luck!**
+## Use Cases
+* Monitor gas prices and get notified of optimal times
+* Track wallet balances and transactions
+* Watch smart contract events
+* Schedule regular data fetching from protocols
+* Set up alerts for price movements
+* Automate reporting of on-chain metrics

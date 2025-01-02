@@ -87,6 +87,7 @@ If no time is specified, omit the timer field.`;
       const formattedTime = scheduledTime.toLocaleString('en-US', {
         hour: 'numeric',
         minute: 'numeric',
+        second: 'numeric',
         hour12: true,
         month: 'short',
         day: 'numeric'
