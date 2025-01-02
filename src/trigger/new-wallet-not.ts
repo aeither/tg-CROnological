@@ -5,19 +5,17 @@ export const newWalletNotTask = task({
   maxDuration: 300,
   run: async (payload: {
     chatId: string;
-    timer: string;
-    action: string;
+    timer?: string;
+    action: "create_wallet" | "fetch_onchain_data";
   }, { ctx }) => {
-    logger.log("Starting webhook call for wallet creation", { payload, ctx });
+    logger.log("Starting webhook call", { payload, ctx });
 
     try {
-      // Wait for specified duration if timer provided
       if (payload.timer) {
         const seconds = Number.parseInt(payload.timer);
         await wait.for({ seconds });
       }
 
-      // Call webhook
       const webhookResponse = await fetch(`${process.env.WEBHOOK_URL}/webhook`, {
         method: 'POST',
         headers: {
@@ -25,7 +23,7 @@ export const newWalletNotTask = task({
         },
         body: JSON.stringify({
           id: ctx.run.id,
-          action: 'create_wallet',
+          action: payload.action,
           data: {
             chatId: payload.chatId,
           },

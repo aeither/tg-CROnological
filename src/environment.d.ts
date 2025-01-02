@@ -9,6 +9,7 @@ export default interface Env {
   WALLET_MNEMONIC: string;
   TRIGGER_SECRET_KEY: string;
   EXPLORER_API_KEY: string;
+  OPEN_AI_API_KEY: string;
 }
 
 declare global {

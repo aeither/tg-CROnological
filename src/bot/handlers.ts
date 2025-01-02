@@ -46,42 +46,57 @@ export const setupBotHandlers = (bot: Bot, env: Env) => {
 
   // Handle regular messages
   bot.on("message", async (ctx) => {
-    const text = ctx.message.text;
+    try {
+      const text = ctx.message.text;
 
-    const groq = createGroq({
-      baseURL: "https://api.groq.com/openai/v1",
-      apiKey: env.GROQ_API_KEY,
-    });
+      const groq = createGroq({
+        baseURL: "https://api.groq.com/openai/v1",
+        apiKey: env.GROQ_API_KEY,
+      });
 
-    const systemPrompt = "You are an assistant that interprets user requests and schedules actions. For example, if the user says 'create a wallet in 5 minutes', you should return an object with the action 'create a wallet' and a timer in seconds, e.g., 300 seconds.";
+      const systemPrompt = `You are an assistant that interprets user requests and schedules blockchain-related actions. You can only perform two actions:
+1. create_wallet - When users request to create/generate a new wallet
+2. fetch_onchain_data - When users request blockchain/token/NFT data
 
-    const result = await generateObject({
-      model: groq("llama-3.3-70b-versatile"),
-      schema: z.object({
-        action: z.string(),
-        timer: z.string(),
-      }),
-      prompt: `${systemPrompt}\n\nUser: ${text}`,
-    });
+For timed requests, include a timer in seconds. Example: "create a wallet in 5 minutes" would return (both string type):
+{
+  "action": "create_wallet",
+  "timer": "300"
+}
 
-    const res = await tasks.trigger("new-wallet-not", {
-      "chatId": ctx.chat.id.toString(),
-      "action": result.object.action,
-      "timer": result.object.timer
-    });
-    console.log("🚀 ~ main ~ res:", res)
+If no time is specified, omit the timer field.`;
 
-    // Calculate scheduled time
-    const scheduledTime = new Date(Date.now() + Number.parseInt(result.object.timer) * 1000);
-    const formattedTime = scheduledTime.toLocaleString('en-US', {
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true,
-      month: 'short',
-      day: 'numeric'
-    });
+      const result = await generateObject({
+        model: groq("llama-3.3-70b-versatile"),
+        schema: z.object({
+          action: z.string(),
+          timer: z.string(),
+        }),
+        prompt: `${systemPrompt}\n\nUser: ${text}`,
+      });
 
-    await ctx.reply(`Scheduled: ${result.object.action} at ${formattedTime}`);
+      const res = await tasks.trigger("new-wallet-not", {
+        "chatId": ctx.chat.id.toString(),
+        "action": result.object.action,
+        "timer": result.object.timer.toString()
+      });
+      console.log("🚀 ~ main ~ res:", res)
+
+      // Calculate scheduled time
+      const scheduledTime = new Date(Date.now() + Number.parseInt(result.object.timer) * 1000);
+      const formattedTime = scheduledTime.toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+        month: 'short',
+        day: 'numeric'
+      });
+
+      await ctx.reply(`Scheduled: ${result.object.action} at ${formattedTime}`);
+    } catch (error) {
+      console.error('Error occurred while processing message:', error);
+      await ctx.reply('An error occurred while processing your message. Please try again later.');
+    }
   });
 
 };

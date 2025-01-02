@@ -8,6 +8,19 @@ export interface WebhookPayload {
     timestamp: string;
 }
 
+interface QueryRequest {
+    query: string;
+    options: {
+        openAI: {
+            apiKey: string;
+        };
+        chainId: number;
+        explorer: {
+            apiKey: string;
+        };
+    };
+}
+
 export async function handleWebhook(req: Request, env: Env): Promise<Response> {
     if (req.method !== 'POST') {
         return new Response('Method not allowed', { status: 405 });
@@ -93,12 +106,64 @@ async function handleFetchOnchainData(
     env: Env
 ): Promise<Response> {
     try {
-        // Implement onchain data fetching logic here
-        return new Response(JSON.stringify({ success: true }), {
+        if (!env.OPEN_AI_API_KEY) throw new Error('OPEN_AI_API_KEY not found');
+        if (!env.EXPLORER_API_KEY) throw new Error('EXPLORER_API_KEY not found');
+
+        const queryRequest: QueryRequest = {
+            query: data.query || 'get latest block',
+            options: {
+                openAI: {
+                    apiKey: env.OPEN_AI_API_KEY,
+                },
+                chainId: data.chainId || 240,
+                explorer: {
+                    apiKey: env.EXPLORER_API_KEY,
+                },
+            },
+        };
+
+        const CDC_AI_AGENT_URL = "http://localhost:8000"
+        const response = await fetch(`${CDC_AI_AGENT_URL}/api/v1/cdc-ai-agent-service/query`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(queryRequest)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Send telegram notification if chatId is provided
+        if (data.chatId) {
+            const telegramResponse = await fetch(
+                `https://api.telegram.org/bot${env.BOT_TOKEN_DEV}/sendMessage`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: data.chatId,
+                        text: JSON.stringify(result, null, 2),
+                    }),
+                }
+            );
+
+            if (!telegramResponse.ok) {
+                throw new Error('Failed to send Telegram notification');
+            }
+        }
+
+        return new Response(JSON.stringify({ success: true, data: result }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
         });
     } catch (error) {
+        console.error('Fetch onchain data error:', error);
         return new Response(
             JSON.stringify({ success: false, error: 'Failed to fetch onchain data' }),
             {
