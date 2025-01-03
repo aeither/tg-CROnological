@@ -5,6 +5,20 @@ Make scheduling tasks as easy as talking to a friend. AI that plans your tasks w
 ## Overview
 CROnological is a Telegram bot that helps Web3 developers and crypto enthusiasts automate and schedule blockchain-related tasks using natural language. Just chat with the bot to schedule on-chain data fetching, monitoring, and notifications - no complex cron syntax needed.
 
+![image](https://github.com/user-attachments/assets/78810db7-24e9-4dc1-a948-fc984327a58d)
+
+## Instruction
+
+Install deps `pnpm install` and set env vars
+
+Run Triggerdotdev `pnpm dlx trigger.dev@latest dev`
+
+Run Telegram Bot `pnpm run dev:webhook`
+
+Expose Telegram Bot with ngrok `pnpm run dev:2` and set telegram bot webhook to the exposed url
+
+Run ai locally with `npm run start` in `cryptocom-ai-agent-service`
+
 ## Key Features
 * Natural language task scheduling (e.g. "check ETH gas every hour")
 * Blockchain data monitoring and alerts
